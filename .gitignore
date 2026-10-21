@@ -28,6 +28,7 @@ env/
 # ==========================================
 # Resultados y logs específicos de abaco_python
 # ==========================================
-entrada/*
-abaco_python/resultados_py/*
-abaco_python/logs_gls/*
+proyecto-abaco/entrada/*
+!proyecto-abaco/entrada/README.md
+proyecto-abaco/abaco_python/resultados_py/*
+proyecto-abaco/abaco_python/logs_gls/*
