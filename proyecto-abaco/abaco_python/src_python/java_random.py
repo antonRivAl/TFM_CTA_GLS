@@ -70,7 +70,7 @@ class JavaRandom:
 
     # -------------------------------------------------------------------------
     # Métodos con interfaz compatible con random.Random de Python
-    # (usados por move15.py y simulated_annealing.py sin cambios adicionales)
+    # (usados por move15.py y gls.py sin cambios adicionales)
     # -------------------------------------------------------------------------
 
     def randint(self, a: int, b: int) -> int:

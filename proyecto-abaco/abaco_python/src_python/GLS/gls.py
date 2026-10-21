@@ -131,14 +131,11 @@ def bucle_gls(
 ) -> list:
     """Bucle externo GLS: optimiza cada individuo de la población con GLS.
 
-    Equivalente conceptual a ``bucle_sa()`` de ``simulated_annealing.py``,
-    pero usa GLS en vez de aceptación probabilística por temperatura.
-    Se asume que la población ya es factible (proveniente de la Fase 2).
-
-    Todos los parámetros del algoritmo GLS (λ, patience, condiciones de parada
-    etc.) se leen de ``parametros_alg.GLS`` (sección GLS de algorithm.properties).
-    Los parámetros de tiempo y máx. iteraciones siguen el mismo patrón que SA:
-    se pueden sobreescribir en llamada o se usan los valores de properties.
+    Optimiza y factibiliza las soluciones mediante Guided Local Search.
+    Todos los parámetros del algoritmo GLS (λ, patience, condiciones de parada, etc.)
+    se leen de ``parametros_alg.GLS`` (sección GLS de algorithm.properties).
+    Los parámetros de tiempo y máx. iteraciones se pueden sobreescribir en llamada
+    o se usan los valores de properties.
 
     Args:
         poblacion       : Lista de Solucion de la Fase 2.
@@ -169,8 +166,8 @@ def bucle_gls(
         else parametros_alg.max_iterations_allowed
     )
 
-    g_max = (parametros_alg.SA.getTamanoMaxMov() // parametros.getTamanoSlots()) * 3
-    g_min = (parametros_alg.SA.getTamanoMinMov() // parametros.getTamanoSlots()) * 3
+    g_max = getattr(parametros_alg.GLS, "move15_max", 3)
+    g_min = getattr(parametros_alg.GLS, "move15_min", 1)
 
     poblacion_mejorada = []
     for idx, individuo in enumerate(poblacion):

@@ -32,3 +32,4 @@ proyecto-abaco/entrada/*
 !proyecto-abaco/entrada/README.md
 proyecto-abaco/abaco_python/resultados_py/*
 proyecto-abaco/abaco_python/logs_gls/*
+proyecto-abaco/abaco_python/src_python/simulated_annealing.py

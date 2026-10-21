@@ -12,7 +12,6 @@ from .initial_population import inicializar_poblacion
 from .models import Controlador, Propiedades, Solucion, Turno
 from .parameters import Parametros, ParametrosAlgoritmo
 from .restrictions import penalizacion_por_restricciones, restricciones_sin_pesos
-from .simulated_annealing import bucle_sa
 from .GLS import bucle_gls
 
 
@@ -34,17 +33,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo", default=_default_repo(), help="Path to proyecto-abaco")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    native_parser = subparsers.add_parser("run-sa", help="Run the native Python SA solver (Phases 2+3 with SA)")
-    native_parser.add_argument("--case", choices=["madN_M1", "madN_M2", "both"], default="madN_M1")
-    native_parser.add_argument("--max-seconds", type=float, default=None)
-    native_parser.add_argument("--max-iterations", type=int, default=None)
-    native_parser.add_argument("--seed", type=int, default=1234)
-    native_parser.add_argument("--prueba", default="P0")
-
     gls_parser = subparsers.add_parser("run-gls", help="Run GLS (Phase 2 y 3)")
     gls_parser.add_argument("--case", choices=["madN_M1", "madN_M2", "both"], default="madN_M1")
-    gls_parser.add_argument("--max-seconds-sa",  type=float, default=None, help="Max seconds for SA Phase 2 (None = use algorithm.properties)")
-    gls_parser.add_argument("--max-seconds-gls", "--max-seconds-sls", type=float, default=None, help="Max seconds for GLS Phase 3 (None = use algorithm.properties)", dest="max_seconds_gls")
+    gls_parser.add_argument("--max-seconds-gls", "--max-seconds-sls", type=float, default=None, help="Max seconds for GLS (None = use algorithm.properties)", dest="max_seconds_gls")
     gls_parser.add_argument("--max-iterations",  type=int,   default=None)
     gls_parser.add_argument("--seed",            type=int,   default=1234)
     gls_parser.add_argument("--prueba",      default="P0")
@@ -58,8 +49,6 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     repo = Path(args.repo).resolve()
 
-    if args.command == "run-sa":
-        return _run_sa(repo, args)
     if args.command == "run-gls":
         return _run_gls(repo, args)
     if args.command == "check":
@@ -123,51 +112,6 @@ def _case_specs(case: str):
     return [specs[case]]
 
 
-def _run_sa(repo: Path, args) -> int:
-    output_dir = Path(args.output_dir).resolve() if args.output_dir else Path(__file__).resolve().parents[1] / "resultados_py"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    summaries = []
-    for idx, (case_path, entrada_id, entorno) in enumerate(_case_specs(args.case)):
-        algorithm, problem = _load_defaults(repo)
-        algorithm.algoritmo = "SA"
-        entrada = Entrada.leer_entrada(repo, problem, case_path, entrada_id, entorno, estudio_estadillos=True)
-        # AQUI EMPIEZA LA FASE 1 (Heurística de Inicialización)
-        poblacion = inicializar_poblacion(entrada, problem)
-        
-        # AQUI EMPIEZA LA FASE 2 Y FASE 3 (el SA las cubre ambas automáticamente:
-        # Fase 2: c_req < tmn  → factibilización, eliminar controladores imaginarios
-        # Fase 3 y c_req >= tmn → optimización, mejorar calidad. Transición automática en fitness.py)
-        soluciones = bucle_sa(
-            poblacion,
-            algorithm,
-            problem,
-            entrada,
-            seed=args.seed + idx if args.seed is not None else None,
-            max_seconds=args.max_seconds,
-            max_iterations=args.max_iterations,
-        )
-        all_solutions = [entrada.getDistribucionInicial(), *poblacion, *soluciones]
-        case_dir = output_dir / f"{case_path}_{entrada_id}"
-        case_dir.mkdir(parents=True, exist_ok=True)
-        for sol_idx, sol in enumerate(all_solutions, start=1):
-            _write_solution_txt(case_dir / f"solucion{sol_idx}.txt", sol)
-            _write_solution_xlsx(case_dir / f"solucion{sol_idx}.xlsx", sol)
-        best = soluciones[-1] if soluciones else poblacion[-1]
-        summary = {
-            "case": case_path,
-            "entrada_id": entrada_id,
-            "solutions_written": len(all_solutions),
-            "output": str(case_dir),
-            "fitnessF2": switch_fitness(best, entrada, problem, algorithm, fase=2),
-            "fitnessF3": switch_fitness(best, entrada, problem, algorithm, fase=3),
-            "weighted_restrictions": penalizacion_por_restricciones(best, entrada, problem),
-            "raw_restrictions": restricciones_sin_pesos(best, entrada, problem),
-        }
-        summaries.append(summary)
-        print(json.dumps(summary, indent=2, ensure_ascii=False))
-    return 0
-
-
 def _run_gls(repo: Path, args) -> int:
     """Ejecuta GLS para las fases 2 y 3.
 
@@ -182,7 +126,7 @@ def _run_gls(repo: Path, args) -> int:
 
     for idx, (case_path, entrada_id, entorno) in enumerate(_case_specs(args.case)):
         algorithm, problem = _load_defaults(repo)
-        algorithm.algoritmo = "SA"
+        algorithm.algoritmo = "GLS"
         entrada = Entrada.leer_entrada(
             repo, problem, case_path, entrada_id, entorno, estudio_estadillos=True
         )
@@ -280,14 +224,15 @@ def _write_solution_xlsx(path: Path, solution: Solucion) -> None:
 
 def _check_native(repo: Path, max_seconds: float, max_iterations: int) -> int:
     class Args:
-        case = "madN_M1"
-        output_dir = str(Path(__file__).resolve().parents[1] / "resultados_py" / "_check_native")
-        seed = 1234
+        pass
 
     args = Args()
-    args.max_seconds = max_seconds
+    args.case = "madN_M1"
+    args.seed = 1234
+    args.max_seconds_gls = max_seconds
     args.max_iterations = max_iterations
-    return _run_sa(repo, args)
+    args.prueba = "check"
+    return _run_gls(repo, args)
 
 
 if __name__ == "__main__":

@@ -173,22 +173,22 @@ class SAParameters:
     @classmethod
     def from_properties(cls, props: dict[str, str]) -> "SAParameters":
         return cls(
-            props["Metodo_De_Temperatura_Inicial"],
-            props["Metodo_De_Calculo_Del_Descenso"],
-            props["Metodo_De_Calculo_De_Iteraciones"],
-            _float(props, "temperaturaInicial"),
-            _float(props, "descensoTemperatura"),
-            _int(props, "iteracionesTemperatura"),
-            _float(props, "condicionParadaPorcent"),
-            _int(props, "condicionParadaCiclos"),
-            _float(props, "condicionParadaNumeroMejoras"),
-            _int(props, "tamanoMaxMov"),
-            _int(props, "tamanoMinMov"),
-            props["movimientosEntorno"],
-            _float(props, "porcentajeEleccionMov"),
-            props["movimientosEntornoGreedy"],
+            props.get("Metodo_De_Temperatura_Inicial", "Fija"),
+            props.get("Metodo_De_Calculo_Del_Descenso", "Krikpatric"),
+            props.get("Metodo_De_Calculo_De_Iteraciones", "C. Estatica"),
+            float(props.get("temperaturaInicial", "0.015")),
+            float(props.get("descensoTemperatura", "0.975")),
+            int(props.get("iteracionesTemperatura", "-1")),
+            float(props.get("condicionParadaPorcent", "0.035")),
+            int(props.get("condicionParadaCiclos", "50000")),
+            float(props.get("condicionParadaNumeroMejoras", "0.02")),
+            int(props.get("tamanoMaxMov", "60")),
+            int(props.get("tamanoMinMov", "10")),
+            props.get("movimientosEntorno", "movimiento15"),
+            float(props.get("porcentajeEleccionMov", "0.10")),
+            props.get("movimientosEntornoGreedy", "movimientoGreedy2"),
             int(props.get("move15_min", "1")),
-            _int(props, "move15_max"),
+            int(props.get("move15_max", "3")),
             props.get("move17_adapt_max", "false").lower() == "true",
             int(props.get("cicloRefinarGrid", "0")),
         )
@@ -251,15 +251,15 @@ class VNSParameters:
 
     @classmethod
     def from_properties(cls, props: dict[str, str]) -> "VNSParameters":
-        porcentaje = props["porcentajeMinimoMejoria"]
+        porcentaje = props.get("porcentajeMinimoMejoria", "0.0")
         return cls(
-            _int(props, "numMaxIteracionesSinMejoraBusquedaLocal"),
+            int(props.get("numMaxIteracionesSinMejoraBusquedaLocal", "0")),
             float("inf") if porcentaje.lower() == "inf" else float(porcentaje),
-            _int(props, "numIteracionesParaComprobarCondicionParadaPorcentaje"),
-            props["tipoVNS"],
-            _float(props, "skewed.alpha"),
-            props["skewed.funcionDistancia"],
-            props["neighborStructures"],
+            int(props.get("numIteracionesParaComprobarCondicionParadaPorcentaje", "0")),
+            props.get("tipoVNS", ""),
+            float(props.get("skewed.alpha", "0.0")),
+            props.get("skewed.funcionDistancia", ""),
+            props.get("neighborStructures", ""),
         )
 
     def getNeighborStructuresString(self) -> str:
@@ -318,6 +318,8 @@ class GLSParameters:
     condicion_parada_num_mejoras: float
     p_guided: float
     w_imaginarios: float
+    move15_min: int = 1
+    move15_max: int = 3
 
     @classmethod
     def from_properties(cls, props: dict[str, str]) -> "GLSParameters":
@@ -332,6 +334,8 @@ class GLSParameters:
             condicion_parada_num_mejoras=float(props.get("gls.condicionParadaNumMejoras", props.get("sls.condicionParadaNumMejoras", "0.005"))),
             p_guided=float(props.get("gls.p_guided", props.get("sls.p_guided", "0.8"))),
             w_imaginarios=float(props.get("gls.w_imaginarios", props.get("sls.w_imaginarios", "0.6"))),
+            move15_min=int(props.get("gls.move15_min", props.get("move15_min", "1"))),
+            move15_max=int(props.get("gls.move15_max", props.get("move15_max", "3"))),
         )
 
     def getLambda(self) -> float:
@@ -364,6 +368,12 @@ class GLSParameters:
     def getWImaginarios(self) -> float:
         return self.w_imaginarios
 
+    def getMove15_min(self) -> int:
+        return self.move15_min
+
+    def getMove15_max(self) -> int:
+        return self.move15_max
+
 
 # Alias de compatibilidad
 SLSParameters = GLSParameters
@@ -379,26 +389,36 @@ class ParametrosAlgoritmo:
     ponderacion_fitness2: float
     ponderacion_fitness3: float
     ponderacion_fitness4: float
-    SA: SAParameters
-    VNS: VNSParameters
     GLS: GLSParameters
+    _sa: SAParameters | None = None
+    _vns: VNSParameters | None = None
 
     @classmethod
     def from_file(cls, path: str | Path) -> "ParametrosAlgoritmo":
         props = load_properties(path)
         return cls(
-            props["algoritmo"],
-            props["funcionFitnessFase2"],
+            props.get("algoritmo", "GLS"),
+            props.get("funcionFitnessFase2", "unificadaF2y3"),
             _int(props, "maxTimeAllowed") * 60 * 1000,
             _int(props, "maxIterationsAllowed"),
             _float(props, "ponderacionFitness1"),
             _float(props, "ponderacionFitness2"),
             _float(props, "ponderacionFitness3"),
             _float(props, "ponderacionFitness4"),
-            SAParameters.from_properties(props),
-            VNSParameters.from_properties(props),
             GLSParameters.from_properties(props),
         )
+
+    @property
+    def SA(self) -> SAParameters:
+        if self._sa is not None:
+            return self._sa
+        return SAParameters.from_properties({})
+
+    @property
+    def VNS(self) -> VNSParameters:
+        if self._vns is not None:
+            return self._vns
+        return VNSParameters.from_properties({})
 
     @property
     def SLS(self) -> GLSParameters:

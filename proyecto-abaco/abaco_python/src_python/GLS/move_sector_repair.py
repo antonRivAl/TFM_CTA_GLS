@@ -354,8 +354,8 @@ def movimiento_sector_safe(
     if move15.grid is None:
         move15.init_grid(sol, parametros, parametros_alg, entrada)
     grid = move15.grid
-    g_min = parametros_alg.SA.move15_min
-    g_max = parametros_alg.SA.move15_max
+    g_min = getattr(getattr(parametros_alg, "GLS", None), "move15_min", 1)
+    g_max = getattr(getattr(parametros_alg, "GLS", None), "move15_max", 3)
     max_sec = parametros.getNumSctrsMax()
     p_min = parametros.getTiempoPosMin() // parametros.getTamanoSlots()
     asignacion = sol.getTurnos()

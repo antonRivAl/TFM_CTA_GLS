@@ -36,8 +36,8 @@ def movimiento(sol: Solucion, g_max: int, g_min: int, entrada, parametros, param
     global grid
     if grid is None:
         init_grid(sol, parametros, parametros_alg, entrada)
-    g_min = parametros_alg.SA.move15_min
-    g_max = parametros_alg.SA.move15_max
+    g_min = getattr(getattr(parametros_alg, "GLS", None), "move15_min", 1)
+    g_max = getattr(getattr(parametros_alg, "GLS", None), "move15_max", 3)
     sol2 = sol.clone()
     asignacion = sol.getTurnos()
     excluded_ctrl1: set[int] = set()

@@ -404,7 +404,7 @@ def movimiento(
 
     Equivalente exacto de Move4.doblemovimiento().
 
-    Con probabilidad `porcent_eleccion_mov` (leída de parametros_alg.SA)
+    Con probabilidad `porcent_eleccion_mov` (leída de parametros_alg.GLS)
     usa el cruce; en caso contrario usa los intervalos.
 
     Args:
@@ -413,7 +413,7 @@ def movimiento(
                          de intervalos (equivalente a gMax/gMin en Java).
         entrada        : Objeto Entrada del problema.
         parametros     : Parámetros del problema.
-        parametros_alg : Parámetros del algoritmo (contiene SA.porcent_eleccion_mov).
+        parametros_alg : Parámetros del algoritmo (contiene GLS.porcentaje_mov_diversificacion).
         rng            : Generador de números aleatorios.
 
     Returns:

@@ -5,7 +5,7 @@ type: software
 authors:
   - family-names: "Riveiro Alonso"
     given-names: "Antón"
-repository-code: "-"
+repository-code: "https://github.com/antonRivAl/TFM_CTA_GLS"
 license: MIT
 version: 1.0.0
 date-released: 2026-10-20

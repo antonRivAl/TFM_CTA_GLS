@@ -81,7 +81,6 @@ python3 -m venv .venv
 ```bash
 source .venv/bin/activate
 ```
-*(En Windows: `.venv\Scripts\activate`)*
 
 3. Instalación de las dependencias requeridas del proyecto:
 ```bash
