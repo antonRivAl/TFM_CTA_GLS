@@ -1,6 +1,8 @@
 # ==========================================
-# Bytecode compilado de Python y cachés
+# Archivos SO y Bytecode compilado de Python y cachés
 # ==========================================
+.DS_Store
+.DS_Store?
 **/__pycache__/
 *.py[cod]
 *$py.class
@@ -28,4 +30,4 @@ env/
 # ==========================================
 entrada/*
 abaco_python/resultados_py/*
-abaco_python/logs_sls/*
+abaco_python/logs_gls/*
