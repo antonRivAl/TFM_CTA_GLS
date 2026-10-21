@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "Si utiliza este software, cite el repositorio y la memoria asociada."
+title: "TFM_CTA_GLS: Optimización de Turnos de Controladores de Tráfico Aéreo mediante Búsqueda Local Guiada"
+type: software
+authors:
+  - family-names: "Riveiro Alonso"
+    given-names: "Antón"
+repository-code: "-"
+license: MIT
+version: 1.0.0
+date-released: 2026-10-20

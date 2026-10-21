@@ -1,0 +1,31 @@
+# ==========================================
+# Bytecode compilado de Python y cachés
+# ==========================================
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ==========================================
+# Entornos virtuales (venv y similares)
+# ==========================================
+.venv/
+venv/
+ENV/
+env/
+.env/
+
+# ==========================================
+# Configuraciones de editores / IDEs
+# ==========================================
+.vscode/
+.idea/
+
+# ==========================================
+# Resultados y logs específicos de abaco_python
+# ==========================================
+entrada/*
+abaco_python/resultados_py/*
+abaco_python/logs_sls/*
